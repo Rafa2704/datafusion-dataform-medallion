@@ -6,7 +6,8 @@ Este projeto implementa um pipeline de dados seguindo a arquitetura Medallion na
 
 ## Arquitetura do Pipeline
 
-![Arquitetura do Pipeline](./path-to-your-image.png)
+![Arquitetura do Pipeline](./PROJETO.jpg)
+
 
 ### Componentes Principais
 
