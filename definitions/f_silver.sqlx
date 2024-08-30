@@ -1,0 +1,14 @@
+config {
+        type: "view"
+
+}
+
+SELECT DISTINCT
+    order_id,
+    customer_id,
+    order_date,
+    product_id,
+    quantity,
+    price,
+    total
+from ${ref("bronze")}

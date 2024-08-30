@@ -1,0 +1,58 @@
+config {
+  type: "table"
+}
+
+WITH TotalPedidosPorCliente AS (
+    SELECT
+        customer_id,
+        COUNT(order_id) AS total_pedidos
+    FROM
+        ${ref("silver")}
+    GROUP BY
+        customer_id
+),
+
+TotalProdutosPorData AS (
+    SELECT
+        DATE(order_date) AS data,
+        COUNT(product_id) AS total_produtos_vendidos
+    FROM
+        ${ref("silver")}
+    GROUP BY
+        DATE(order_date)
+),
+
+TotalFaturamentoPorProduto AS (
+    SELECT
+        product_id,
+        SUM(total) AS total_faturamento
+    FROM
+        ${ref("silver")}
+    GROUP BY
+        product_id
+),
+
+TotalFaturamentoPorCliente AS (
+    SELECT
+        customer_id,
+        SUM(total) AS total_faturamento_cliente
+    FROM
+        ${ref("silver")}
+    GROUP BY
+        customer_id
+)
+
+
+SELECT 
+    COALESCE(TotalPedidosPorCliente.customer_id, TotalFaturamentoPorCliente.customer_id) AS customer_id,
+    TotalPedidosPorCliente.total_pedidos,
+    TotalFaturamentoPorCliente.total_faturamento_cliente,
+    TotalProdutosPorData.data,
+    TotalProdutosPorData.total_produtos_vendidos,
+    TotalFaturamentoPorProduto.product_id,
+    TotalFaturamentoPorProduto.total_faturamento
+FROM 
+    TotalPedidosPorCliente
+    LEFT JOIN TotalFaturamentoPorCliente ON TotalPedidosPorCliente.customer_id = TotalFaturamentoPorCliente.customer_id
+    LEFT JOIN TotalFaturamentoPorProduto ON TotalPedidosPorCliente.customer_id = TotalFaturamentoPorProduto.product_id
+    LEFT JOIN TotalProdutosPorData ON CAST(TotalPedidosPorCliente.customer_id AS STRING) = CAST(FORMAT_DATE('%Y%m%d', TotalProdutosPorData.data) AS STRING)
